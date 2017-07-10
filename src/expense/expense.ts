@@ -1,17 +1,18 @@
 import { Router } from 'express';
 import { Connection, Model } from 'mongoose';
 import { Route, RouteRegistration, Param, ParamSource } from '../route';
-import { IncomeModel, Income, IncomeSchema} from './income.model';
+import { ExpenseModel, Expense, ExpenseSchema} from './expense.model';
 
-export class IncomeRoute extends Route<Income>{
-	private model: Model<IncomeModel>;
+export class ExpenseRoute extends Route<Expense>{
+	private model: Model<ExpenseModel>;
 
 	constructor(router: Router, connection: Connection) {
-		super('/income', router, connection);
-		this.model = this.connection.model<IncomeModel>('income', IncomeSchema);
+		super('/expense', router, connection);
+		this.model = this.connection.model<ExpenseModel>('expense', ExpenseSchema);
+		this.populates = ['type'];
 	}
 
-	public getAll(query: any): Promise<IncomeModel[]>{
+	public getAll(query: any): Promise<Expense[]>{
 		if (!query) {
 			query = {};
 		}
@@ -25,19 +26,19 @@ export class IncomeRoute extends Route<Income>{
 		return this.model.findOne({ _id: id }, {}, query);
 	}
 
-	public create(income: Income): Promise<IncomeModel> {
-		return this.model.create(income);
+	public create(expense: Expense): Promise<Expense> {
+		return this.model.create(expense);
 	}
 
-	public edit(id: string, income: Income): Promise<IncomeModel> {
+	public edit(id: string, expense: Expense): Promise<Expense> {
 		return this.model.findOneAndUpdate(
 			{ _id: id },
-			{ $set: income },
+			{ $set: expense },
 			{ new: true }
 		);
 	}
 
-	public delete(id: string): Promise<IncomeModel> {
+	public delete(id: string): Promise<Expense> {
 		return this.model.findOneAndRemove({ _id: id });
 	}
 
@@ -46,7 +47,7 @@ export class IncomeRoute extends Route<Income>{
 			new Param('', ParamSource.query)
 		]));
 		this.routes.push(new RouteRegistration('/', 'post', 'create', [
-			new Param('', ParamSource.body, Income)
+			new Param('', ParamSource.body, Expense)
 		]));
 		this.routes.push(new RouteRegistration('/:id', 'get', 'getOne', [
 			new Param('id', ParamSource.params),
@@ -54,7 +55,7 @@ export class IncomeRoute extends Route<Income>{
 		]));
 		this.routes.push(new RouteRegistration('/:id', 'put', 'edit', [
 			new Param('id', ParamSource.params),
-			new Param('', ParamSource.body, Income)
+			new Param('', ParamSource.body, Expense)
 		]));
 		this.routes.push(new RouteRegistration('/:id', 'delete', 'delete', [
 			new Param('id', ParamSource.params)

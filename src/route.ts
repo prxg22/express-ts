@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Connection, Model } from 'mongoose';
+import { Connection, Model, Document } from 'mongoose';
 import { Error, ErrorCode } from './error';
 
 export enum ParamSource {
@@ -45,6 +45,7 @@ export class RouteRegistration {
 
 export class Route<T> {
 	public routes: RouteRegistration[];
+	public populates: string[];
 
 	constructor(private path: string, private router: Router, protected readonly connection?: Connection) {
 		this.routes = [];
@@ -60,13 +61,22 @@ export class Route<T> {
 		});
 	}
 
+
 	protected registerRoutes(){};
 
 	private route(route: RouteRegistration) {
 		return (req: Request, res: Response, next: NextFunction) => {
 			let params = route.getParams(req);
-			let promise: Promise<T|T[]>;
+			let promise;
 			promise = this[route.action](...params);
+
+			if (this.populates) {
+				this.populates.map(populate => {
+					if (route.method !== 'post'){
+						promise.populate(populate);
+					}
+				});
+			}
 
 			return promise.then(
 				(results: T | T[] | void) => {

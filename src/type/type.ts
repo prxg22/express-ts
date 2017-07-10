@@ -5,35 +5,33 @@ import { RouteRegistration, Route, Param, ParamSource } from '../route';
 import { Type, TypeSchema, TypeModel } from './type.model';
 
 
-export class TypeRoute extends Route<Type> {
+export class TypeRoute extends Route<TypeModel> {
+	private model: Model<TypeModel>;
+	
 	constructor(router: Router, connection: Connection) {
 		super('/type', router, connection);
+		this.model = this.connection.model<TypeModel>('type', TypeSchema);
 	}
 
-	public getAll(query: any): Promise<Type[]> {
-		let model = this.connection.model<TypeModel>('type', TypeSchema);
-		return model.find();
+	public getAll(query: any): Promise<TypeModel[]> {
+		return this.model.find();
 
 	}
 
-	public getOne(id: string, query: any): Promise<Type> {
-		let model = this.connection.model<TypeModel>('type', TypeSchema);
-		return model.findOne({ _id: id });
+	public getOne(id: string, query: any): Promise<TypeModel> {
+		return this.model.findOne({ _id: id });
 	}
 
-	public create(type: Type): Promise<Type> {
-		let model = this.connection.model<TypeModel>('type', TypeSchema);
-		return model.create(type);
+	public create(type: Type): Promise<TypeModel> {
+		return this.model.create(type);
 	}
 	
-	public delete(id: string): Promise<Type> {
-		let model = this.connection.model<TypeModel>('type', TypeSchema);
-		return model.findOneAndRemove({_id: id});
+	public delete(id: string): Promise<TypeModel> {
+		return this.model.findOneAndRemove({_id: id});
 	}
 
-	public edit(id: string, type: Type): Promise<Type> {
-		let model = this.connection.model<TypeModel>('type', TypeSchema);
-		return model.findOneAndUpdate({ _id: id }, { $set: type }, { new: true });
+	public edit(id: string, type: Type): Promise<TypeModel> {
+		return this.model.findOneAndUpdate({ _id: id }, { $set: type }, { new: true });
 	}
 
 	protected registerRoutes() {

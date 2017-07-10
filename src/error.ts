@@ -39,6 +39,7 @@ export class Error{
 
 export class ErrorHandler {
 	public error(err: any, req: Request, res: Response, next: NextFunction) {
+		console.error(err);
 		err = new Error(err);
 		res.status(err.code).send(<Error> err);
 	}

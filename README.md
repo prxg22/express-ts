@@ -1,2 +1,2 @@
-# express-ts
-Express/Typescript API server
+# planilha-financeira
+API para planilha financeira pessoal
