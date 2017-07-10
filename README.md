@@ -1,2 +1,2 @@
-# planilha-financeira
-API para planilha financeira pessoal
+# express-ts
+Express/Typescript + MongoDB API framework
