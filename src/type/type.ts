@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Connection, Model } from 'mongoose';
 
-import { Route, Controller } from '../route';
+import { RouteRegistration, Route, Param, ParamSource } from '../route';
 import { TypeSchema, TypeModel } from './type.schema';
 
 export interface Type {
@@ -12,26 +12,31 @@ export interface Type {
 }
 
 
-export class TypeController extends Controller<Type> {
+export class TypeController extends Route<Type> {
 	constructor(router: Router, connection: Connection) {
 		super('/type', router, connection);
 	}
 
 	public getAll(query: any): Promise<Type[]> {
-		console.log('entrei sem parametros');
 		let model = this.connection.model<TypeModel>('type', TypeSchema);
+		console.log(query);
 		return model.find();
 
 	}
 
-	public getOne(params: any, query: any): Promise<Type[]> {
-		console.log(params);
+	public getOne(id: string, query: any): Promise<Type> {
 		let model = this.connection.model<TypeModel>('type', TypeSchema);
-		return model.find({_id: params.id});
+		return model.findOne({_id: id});
 	}
 
 	protected registerRoutes() {
-		this.routes.push(new Route('/', 'get', 'getAll'));
-		this.routes.push(new Route('/:id', 'get', 'getOne'));
+		this.routes.push(new RouteRegistration('/', 'get', 'getAll', [
+			new Param('modifiedAt', ParamSource.query, Date);
+		]));
+
+		this.routes.push(new RouteRegistration('/:id', 'get', 'getOne', [
+			new Param('id', ParamSource.params),
+			new Param('', ParamSource.query)
+		]));
 	}
 }
