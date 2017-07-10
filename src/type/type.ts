@@ -20,22 +20,18 @@ export class TypeController extends Controller<Type> {
 	public getAll(query: any): Promise<Type[]> {
 		console.log('entrei sem parametros');
 		let model = this.connection.model<TypeModel>('type', TypeSchema);
-		console.log(model);
 		return model.find();
 
 	}
 
-	public getOne() {
-		return (params: any, query: any): Promise<Type[]> => {
-			console.log(params);
-			let model = this.connection.model<TypeModel>('type', TypeSchema);
-			return model.find({_id: params.id});
-
-		}
+	public getOne(params: any, query: any): Promise<Type[]> {
+		console.log(params);
+		let model = this.connection.model<TypeModel>('type', TypeSchema);
+		return model.find({_id: params.id});
 	}
 
 	protected registerRoutes() {
-		this.routes.push(new Route('/', 'get', this.getAll));
-		this.routes.push(new Route('/:id', 'get', this.getOne()));
+		this.routes.push(new Route('/', 'get', 'getAll'));
+		this.routes.push(new Route('/:id', 'get', 'getOne'));
 	}
 }

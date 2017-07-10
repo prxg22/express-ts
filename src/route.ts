@@ -48,11 +48,11 @@ export class Controller<T> {
 	private get(route: Route) {
 		return (req: Request, res: Response, next: NextFunction) => {
 			let params = route.useParams();
-			let promise: Promise<T>;
+			let promise: Promise<T|T[]>;
 			if (params) {
-				promise = route.action(req.params, req.query);
+				promise = this[route.action](req.params, req.query);
 			} else {
-				promise = route.action(req.query);
+				promise = this[route.action](req.query);
 			}
 
 			return promise.then(
