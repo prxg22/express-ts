@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { Connection } from 'mongoose';
+import { Connection, Model } from 'mongoose';
 import { Error, ErrorCode } from './error';
 
 export enum ParamSource {
@@ -39,14 +39,14 @@ export class RouteRegistration {
 	) {};
 
 	public getParams(req: Request) {
-		return this.params.map((param: Param) => param.get(req));
+		return this.params ? this.params.map((param: Param) => param.get(req)) : [];
 	}
 }
 
 export class Route<T> {
 	public routes: RouteRegistration[];
 
-	constructor(private path: string, private router: Router, protected connection?: Connection) {
+	constructor(private path: string, private router: Router, protected readonly connection?: Connection) {
 		this.routes = [];
 		this.registerRoutes();
 		this.registerMiddleware();
@@ -56,39 +56,24 @@ export class Route<T> {
 		this.routes.map(route => {
 			let path = this.path + route.path;
 			console.log(`> Registrando rota (${route.method}): ${path}`);
-			this.router[route.method](path, this[route.method](route));
+			this.router[route.method](path, this.route(route));
 		});
 	}
 
 	protected registerRoutes(){};
 
-	private get(route: RouteRegistration) {
+	private route(route: RouteRegistration) {
 		return (req: Request, res: Response, next: NextFunction) => {
 			let params = route.getParams(req);
-			let action = this[route.action];
-
 			let promise: Promise<T|T[]>;
 			promise = this[route.action](...params);
 
 			return promise.then(
-				(results: T|T[]) => results ? res.send(results) : new Error(ErrorCode.NOT_FOUND),
+				(results: T | T[] | void) => {
+					return results ? res.status(200).send(results) : next(new Error({code: ErrorCode.NOT_FOUND}));
+				},
 				err => next(err)
 			);
 		}
 	};
-
-
-	private post = (req: Request, res: Response, next: NextFunction) => {
-		next(new Error());
-	};
-
-
-	private delete = (req: Request, res: Response, next: NextFunction) => {
-		next(new Error());
-	};
-
-	private put = (req: Request, res: Response, next: NextFunction) => {
-		next(new Error());
-	}
-
 }
